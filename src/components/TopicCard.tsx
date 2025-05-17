@@ -1,18 +1,13 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ValueExplanation {
   value: string | number;
@@ -28,74 +23,105 @@ interface KafkaTopicConfig {
 
 interface TopicCardProps {
   topic: KafkaTopicConfig;
+  onApply?: () => void;
 }
 
-const TopicCard: React.FC<TopicCardProps> = ({ topic }) => {
+const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [expandedExplanation, setExpandedExplanation] = useState<string | null>(null);
+  
+  const toggleExplanation = (field: string) => {
+    if (expandedExplanation === field) {
+      setExpandedExplanation(null);
+    } else {
+      setExpandedExplanation(field);
+    }
+  };
 
   return (
-    <Card className="w-full mb-4 overflow-hidden border-l-4 border-l-kafka animate-fade-in">
-      <CardHeader className="bg-kafka-light">
-        <CardTitle className="text-kafka-dark flex items-center justify-between">
+    <Card className="w-full mb-4 overflow-hidden border-l-4 border-l-kafka animate-fade-in dark:bg-card">
+      <CardHeader className="bg-kafka-light dark:bg-kafka-light/10">
+        <CardTitle className="text-kafka-dark dark:text-kafka flex items-center justify-between">
           <span className="font-mono">{topic.name.value}</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <span className="sr-only">Topic name info</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4" />
-                    <path d="M12 8h.01" />
-                  </svg>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">{topic.name.explanation}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0"
+            onClick={() => toggleExplanation('name')}
+            aria-label={expandedExplanation === 'name' ? 'Hide topic name explanation' : 'Show topic name explanation'}
+          >
+            <span className="sr-only">Topic name info</span>
+            {expandedExplanation === 'name' ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
         </CardTitle>
+        
+        <Collapsible 
+          open={expandedExplanation === 'name'} 
+          onOpenChange={() => toggleExplanation('name')}
+          className="mt-2"
+        >
+          <CollapsibleContent className="text-sm border-t pt-2 mt-2 text-muted-foreground animate-accordion-down">
+            {topic.name.explanation}
+          </CollapsibleContent>
+        </Collapsible>
       </CardHeader>
+      
       <CardContent className="pt-4">
         <div className="space-y-4">
           <div className="flex flex-wrap gap-4">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center space-x-2 rounded-md border p-2 cursor-help">
-                    <div className="text-sm font-medium leading-none">Partitions:</div>
-                    <div className="text-sm text-kafka font-bold">{topic.partitions.value}</div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-sm">
-                  <p>{topic.partitions.explanation}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div className="flex flex-col">
+              <div 
+                className="flex items-center space-x-2 rounded-md border p-2 cursor-pointer"
+                onClick={() => toggleExplanation('partitions')}
+              >
+                <div className="text-sm font-medium leading-none">Partitions:</div>
+                <div className="text-sm text-kafka font-bold">{topic.partitions.value}</div>
+                {expandedExplanation === 'partitions' ? (
+                  <ChevronUp className="h-4 w-4 ml-1" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 ml-1" />
+                )}
+              </div>
+              
+              <Collapsible 
+                open={expandedExplanation === 'partitions'} 
+                onOpenChange={() => toggleExplanation('partitions')}
+                className="mt-1"
+              >
+                <CollapsibleContent className="text-xs p-2 bg-muted/30 rounded-md animate-accordion-down">
+                  {topic.partitions.explanation}
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center space-x-2 rounded-md border p-2 cursor-help">
-                    <div className="text-sm font-medium leading-none">Replication Factor:</div>
-                    <div className="text-sm text-kafka font-bold">{topic.replicationFactor.value}</div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-sm">
-                  <p>{topic.replicationFactor.explanation}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <div className="flex flex-col">
+              <div 
+                className="flex items-center space-x-2 rounded-md border p-2 cursor-pointer"
+                onClick={() => toggleExplanation('replicationFactor')}
+              >
+                <div className="text-sm font-medium leading-none">Replication Factor:</div>
+                <div className="text-sm text-kafka font-bold">{topic.replicationFactor.value}</div>
+                {expandedExplanation === 'replicationFactor' ? (
+                  <ChevronUp className="h-4 w-4 ml-1" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 ml-1" />
+                )}
+              </div>
+              
+              <Collapsible 
+                open={expandedExplanation === 'replicationFactor'} 
+                onOpenChange={() => toggleExplanation('replicationFactor')}
+                className="mt-1"
+              >
+                <CollapsibleContent className="text-xs p-2 bg-muted/30 rounded-md animate-accordion-down">
+                  {topic.replicationFactor.explanation}
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </div>
 
           <Collapsible
@@ -106,23 +132,14 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic }) => {
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-1">
                 <span>Configuration</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={`h-4 w-4 transition-transform ${isConfigOpen ? 'rotate-180' : ''}`}
-                >
-                  <path d="M18 15l-6-6-6 6"/>
-                </svg>
+                {isConfigOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2">
+            <CollapsibleContent className="space-y-2 animate-accordion-down">
               <div className="rounded-md border bg-muted/50">
                 <div className="p-4">
                   <h4 className="text-sm font-medium leading-none mb-2">Topic Configurations</h4>
@@ -140,6 +157,17 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic }) => {
           </Collapsible>
         </div>
       </CardContent>
+      
+      {onApply && (
+        <CardFooter className="border-t p-4 bg-muted/20 flex justify-end">
+          <Button 
+            onClick={onApply}
+            className="bg-kafka hover:bg-kafka-dark text-white font-medium"
+          >
+            APPLY
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };

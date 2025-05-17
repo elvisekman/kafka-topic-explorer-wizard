@@ -1,10 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import KafkaHeader from '@/components/KafkaHeader';
 import RequestForm from '@/components/RequestForm';
 import TopicList from '@/components/TopicList';
+import NetworkBackground from '@/components/NetworkBackground';
+import ConfigHistorySidebar from '@/components/ConfigHistorySidebar';
 import { generateKafkaStructure } from '@/services/api';
 import { useToast } from '@/components/ui/use-toast';
+import { useTheme } from '@/components/ThemeProvider';
+import { useConfigHistory } from '@/context/ConfigHistoryContext';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Moon, Sun, History } from 'lucide-react';
 
 interface KafkaTopic {
   name: {
@@ -27,14 +34,38 @@ const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const { toast } = useToast();
+  const { theme, toggleTheme } = useTheme();
+  const { 
+    addToHistory, 
+    selectedConfigId, 
+    setSelectedConfigId, 
+    getConfigById
+  } = useConfigHistory();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Load selected config if available
+  useEffect(() => {
+    if (selectedConfigId) {
+      const config = getConfigById(selectedConfigId);
+      if (config) {
+        setTopics(config.topics);
+        setHasSubmitted(true);
+      }
+    }
+  }, [selectedConfigId, getConfigById]);
 
   const handleSubmit = async (request: string) => {
     setIsLoading(true);
     setHasSubmitted(true);
+    setSelectedConfigId(null);
     
     try {
       const response = await generateKafkaStructure(request);
       setTopics(response.topics);
+      
+      // Add to history
+      const configId = addToHistory(request, response.topics);
+      
       toast({
         title: "Topics Generated Successfully",
         description: `${response.topics.length} topic structure${response.topics.length === 1 ? '' : 's'} generated.`,
@@ -53,8 +84,42 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <KafkaHeader />
+    <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
+      <NetworkBackground />
+      
+      <KafkaHeader>
+        <div className="flex items-center space-x-2">
+          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="rounded-full"
+                aria-label="View History"
+              >
+                <History className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[350px] sm:w-[450px]">
+              <ConfigHistorySidebar onConfigSelect={() => setIsSidebarOpen(false)} />
+            </SheetContent>
+          </Sheet>
+        
+          <Button 
+            variant="outline" 
+            size="icon"
+            className="rounded-full"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </KafkaHeader>
       
       <main className="flex-grow container mx-auto px-4 py-8">
         <RequestForm onSubmit={handleSubmit} isLoading={isLoading} />
@@ -74,7 +139,12 @@ const Index: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && topics.length > 0 && <TopicList topics={topics} />}
+        {!isLoading && topics.length > 0 && (
+          <TopicList 
+            topics={topics} 
+            selectedConfigId={selectedConfigId}
+          />
+        )}
       </main>
 
       <footer className="bg-muted py-6 mt-auto">

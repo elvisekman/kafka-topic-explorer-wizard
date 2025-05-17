@@ -1,9 +1,13 @@
 
 import React from 'react';
 
-const KafkaHeader = () => {
+interface KafkaHeaderProps {
+  children?: React.ReactNode;
+}
+
+const KafkaHeader: React.FC<KafkaHeaderProps> = ({ children }) => {
   return (
-    <header className="w-full bg-kafka py-4 shadow-md">
+    <header className="w-full bg-kafka text-white py-4 shadow-md transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -20,6 +24,8 @@ const KafkaHeader = () => {
             </svg>
             <h1 className="text-xl font-bold text-white">Kafka Topic Explorer</h1>
           </div>
+          
+          {children}
         </div>
       </div>
     </header>
