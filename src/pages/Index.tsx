@@ -1,17 +1,20 @@
-
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import KafkaHeader from '@/components/KafkaHeader';
 import RequestForm from '@/components/RequestForm';
 import TopicList from '@/components/TopicList';
 import NetworkBackground from '@/components/NetworkBackground';
 import ConfigHistorySidebar from '@/components/ConfigHistorySidebar';
-import { generateKafkaStructure } from '@/services/api';
-import { useToast } from '@/components/ui/use-toast';
-import { useTheme } from '@/components/ThemeProvider';
-import { useConfigHistory } from '@/context/ConfigHistoryContext';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Moon, Sun, History } from 'lucide-react';
+import {generateKafkaStructure} from '@/services/api';
+import {useToast} from '@/components/ui/use-toast';
+import {useTheme} from '@/components/ThemeProvider';
+import {useConfigHistory} from '@/context/ConfigHistoryContext';
+import {Button} from '@/components/ui/button';
+import {Sheet, SheetContent, SheetTrigger} from '@/components/ui/sheet';
+import {Moon, Sun, History} from 'lucide-react';
+
+interface ListOfTopics {
+  topics: KafkaTopic[];
+}
 
 interface KafkaTopic {
   name: {
@@ -33,12 +36,12 @@ const Index: React.FC = () => {
   const [topics, setTopics] = useState<KafkaTopic[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const { toast } = useToast();
-  const { theme, toggleTheme } = useTheme();
-  const { 
-    addToHistory, 
-    selectedConfigId, 
-    setSelectedConfigId, 
+  const {toast} = useToast();
+  const {theme, toggleTheme} = useTheme();
+  const {
+    addToHistory,
+    selectedConfigId,
+    setSelectedConfigId,
     getConfigById
   } = useConfigHistory();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -58,14 +61,28 @@ const Index: React.FC = () => {
     setIsLoading(true);
     setHasSubmitted(true);
     setSelectedConfigId(null);
-    
+
     try {
-      const response = await generateKafkaStructure(request);
+      let response = await new Promise(response => setTimeout(response, 1000)) as ListOfTopics;
+      if (!response) {
+        response = {
+          topics: [
+            {
+              name: {value: 'example-topic', explanation: 'Example topic name'},
+              partitions: {value: 3, explanation: 'Number of partitions'},
+              replicationFactor: {value: 2, explanation: 'Replication factor'},
+              configs: {retention: '7 days', cleanupPolicy: 'compact'}
+            } as KafkaTopic
+          ]
+        } as ListOfTopics;
+      }
+
+
       setTopics(response.topics);
-      
+
       // Add to history
       const configId = addToHistory(request, response.topics);
-      
+
       toast({
         title: "Topics Generated Successfully",
         description: `${response.topics.length} topic structure${response.topics.length === 1 ? '' : 's'} generated.`,
@@ -85,45 +102,45 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
-      <NetworkBackground />
-      
+      <NetworkBackground/>
+
       <KafkaHeader>
         <div className="flex items-center space-x-2">
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="icon"
                 className="rounded-full"
                 aria-label="View History"
               >
-                <History className="h-4 w-4" />
+                <History className="h-4 w-4"/>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[350px] sm:w-[450px]">
-              <ConfigHistorySidebar onConfigSelect={() => setIsSidebarOpen(false)} />
+              <ConfigHistorySidebar onConfigSelect={() => setIsSidebarOpen(false)}/>
             </SheetContent>
           </Sheet>
-        
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             size="icon"
             className="rounded-full"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4" />
+              <Sun className="h-4 w-4"/>
             ) : (
-              <Moon className="h-4 w-4" />
+              <Moon className="h-4 w-4"/>
             )}
           </Button>
         </div>
       </KafkaHeader>
-      
+
       <main className="flex-grow container mx-auto px-4 py-8">
-        <RequestForm onSubmit={handleSubmit} isLoading={isLoading} />
-        
+        <RequestForm onSubmit={handleSubmit} isLoading={isLoading}/>
+
         {isLoading && (
           <div className="w-full max-w-4xl mx-auto p-6 flex justify-center">
             <div className="flex flex-col items-center space-y-4">
@@ -140,8 +157,8 @@ const Index: React.FC = () => {
         )}
 
         {!isLoading && topics.length > 0 && (
-          <TopicList 
-            topics={topics} 
+          <TopicList
+            topics={topics}
             selectedConfigId={selectedConfigId}
           />
         )}
