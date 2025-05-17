@@ -29,7 +29,7 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSubmit, isLoading }) => {
   return (
     <div className="w-full max-w-3xl mx-auto p-6 animate-fade-in">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold mb-2">Describe Your Kafka Topic Structure</h2>
+        <h2 className="text-2xl font-bold mb-2">Elvis Var här</h2>
         <p className="text-muted-foreground">
           Enter a description of your data requirements and we'll suggest an appropriate Kafka topic structure.
         </p>
