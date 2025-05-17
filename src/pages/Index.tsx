@@ -1,20 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import KafkaHeader from '@/components/KafkaHeader';
-import RequestForm from '@/components/RequestForm';
-import TopicList from '@/components/TopicList';
 import NetworkBackground from '@/components/NetworkBackground';
-import ConfigHistorySidebar from '@/components/ConfigHistorySidebar';
-import {generateKafkaStructure} from '@/services/api';
-import {useToast} from '@/components/ui/use-toast';
 import {useTheme} from '@/components/ThemeProvider';
 import {useConfigHistory} from '@/context/ConfigHistoryContext';
-import {Button} from '@/components/ui/button';
-import {Sheet, SheetContent, SheetTrigger} from '@/components/ui/sheet';
-import {Moon, Sun, History} from 'lucide-react';
-
-interface ListOfTopics {
-  topics: KafkaTopic[];
-}
+import KaiMascot from '@/components/KaiMascot';
+import PromptSection from '@/components/PromptSection';
+import ResultsSection from '@/components/ResultsSection';
+import {useToast} from '@/components/ui/use-toast';
 
 interface KafkaTopic {
   name: {
@@ -32,19 +24,24 @@ interface KafkaTopic {
   configs: Record<string, string>;
 }
 
+interface ListOfTopics {
+  topics: KafkaTopic[];
+}
+
 const Index: React.FC = () => {
   const [topics, setTopics] = useState<KafkaTopic[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const {toast} = useToast();
-  const {theme, toggleTheme} = useTheme();
+  const {theme} = useTheme();
   const {
-    addToHistory,
     selectedConfigId,
     setSelectedConfigId,
-    getConfigById
+    getConfigById,
+    addToHistory,
   } = useConfigHistory();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mascotAnimation, setMascotAnimation] = useState<'idle' | 'wiggle' | 'explain'>('wiggle');
+  const [isExplaining, setIsExplaining] = useState(false);
+  const {toast} = useToast();
 
   // Load selected config if available
   useEffect(() => {
@@ -57,10 +54,23 @@ const Index: React.FC = () => {
     }
   }, [selectedConfigId, getConfigById]);
 
+  // Handle field explanation
+  const handleExplanationClick = () => {
+    setMascotAnimation('explain');
+    setIsExplaining(true);
+    
+    // Reset mascot animation after explanation
+    setTimeout(() => {
+      setMascotAnimation('idle');
+      setIsExplaining(false);
+    }, 2000);
+  };
+
   const handleSubmit = async (request: string) => {
     setIsLoading(true);
     setHasSubmitted(true);
     setSelectedConfigId(null);
+    setMascotAnimation('wiggle');
 
     try {
       let response = await new Promise(response => setTimeout(response, 1000)) as ListOfTopics;
@@ -89,79 +99,37 @@ const Index: React.FC = () => {
       });
     } catch (error) {
       console.error('Error generating Kafka structure:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate Kafka structure",
-        variant: "destructive",
-      });
       setTopics([]);
     } finally {
       setIsLoading(false);
+      setMascotAnimation('idle');
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
       <NetworkBackground/>
+      <KafkaHeader />
 
-      <KafkaHeader>
-        <div className="flex items-center space-x-2">
-          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full"
-                aria-label="View History"
-              >
-                <History className="h-4 w-4"/>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[350px] sm:w-[450px]">
-              <ConfigHistorySidebar onConfigSelect={() => setIsSidebarOpen(false)}/>
-            </SheetContent>
-          </Sheet>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full"
-            onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-4 w-4"/>
-            ) : (
-              <Moon className="h-4 w-4"/>
-            )}
-          </Button>
+      <main className="flex-grow flex flex-col lg:flex-row">
+        {/* Left Panel - Prompting Area */}
+        <div className="w-full lg:w-1/2 p-4 lg:p-8 flex flex-col items-center">
+          <PromptSection onSubmit={handleSubmit} isLoading={isLoading} />
+          <div className="flex-grow flex items-center justify-center">
+            <KaiMascot animation={mascotAnimation} isLoading={isLoading} />
+          </div>
         </div>
-      </KafkaHeader>
-
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <RequestForm onSubmit={handleSubmit} isLoading={isLoading}/>
-
-        {isLoading && (
-          <div className="w-full max-w-4xl mx-auto p-6 flex justify-center">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="h-12 w-12 rounded-full border-4 border-t-kafka border-kafka/30 animate-spin"></div>
-              <p className="text-muted-foreground">Generating Kafka topic structure...</p>
-            </div>
-          </div>
-        )}
-
-        {hasSubmitted && !isLoading && topics.length === 0 && (
-          <div className="w-full max-w-4xl mx-auto p-6 text-center">
-            <p className="text-muted-foreground">No topics were generated. Please try a different request.</p>
-          </div>
-        )}
-
-        {!isLoading && topics.length > 0 && (
-          <TopicList
+        
+        {/* Right Panel - Results Display Area */}
+        <div className="w-full lg:w-1/2 p-4 lg:p-8 bg-black/20">
+          <ResultsSection 
             topics={topics}
+            isLoading={isLoading}
+            hasSubmitted={hasSubmitted}
+            onExplanationClick={handleExplanationClick}
             selectedConfigId={selectedConfigId}
           />
-        )}
+        </div>
       </main>
 
       <footer className="bg-muted py-6 mt-auto">

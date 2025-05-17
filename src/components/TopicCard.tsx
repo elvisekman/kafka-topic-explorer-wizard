@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ValueExplanation {
   value: string | number;
@@ -24,9 +25,10 @@ interface KafkaTopicConfig {
 interface TopicCardProps {
   topic: KafkaTopicConfig;
   onApply?: () => void;
+  onExplanationClick: () => void;
 }
 
-const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
+const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply, onExplanationClick }) => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [expandedExplanation, setExpandedExplanation] = useState<string | null>(null);
   
@@ -35,18 +37,19 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
       setExpandedExplanation(null);
     } else {
       setExpandedExplanation(field);
+      onExplanationClick();
     }
   };
 
   return (
-    <Card className="w-full mb-4 overflow-hidden border-l-4 border-l-kafka animate-fade-in dark:bg-card">
-      <CardHeader className="bg-kafka-light dark:bg-kafka-light/10">
-        <CardTitle className="text-kafka-dark dark:text-kafka flex items-center justify-between">
+    <Card className="w-full overflow-hidden border-l-4 border-l-[#ffad1d] bg-black/40 text-white animate-fade-in">
+      <CardHeader className="bg-gradient-to-r from-[#8c0862]/30 to-transparent border-b border-[#ffad1d]/20">
+        <CardTitle className="text-[#ffad1d] flex items-center justify-between">
           <span className="font-mono">{topic.name.value}</span>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 text-[#ffad1d] hover:text-white hover:bg-[#8c0862]/50"
             onClick={() => toggleExplanation('name')}
             aria-label={expandedExplanation === 'name' ? 'Hide topic name explanation' : 'Show topic name explanation'}
           >
@@ -64,7 +67,7 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
           onOpenChange={() => toggleExplanation('name')}
           className="mt-2"
         >
-          <CollapsibleContent className="text-sm border-t pt-2 mt-2 text-muted-foreground animate-accordion-down">
+          <CollapsibleContent className="text-sm border-t pt-2 mt-2 text-white/80 animate-accordion-down">
             {topic.name.explanation}
           </CollapsibleContent>
         </Collapsible>
@@ -75,15 +78,15 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col">
               <div 
-                className="flex items-center space-x-2 rounded-md border p-2 cursor-pointer"
+                className="flex items-center space-x-2 rounded-md border border-[#8c0862]/50 p-2 cursor-pointer bg-black/30 hover:bg-black/50 transition-colors"
                 onClick={() => toggleExplanation('partitions')}
               >
                 <div className="text-sm font-medium leading-none">Partitions:</div>
-                <div className="text-sm text-kafka font-bold">{topic.partitions.value}</div>
+                <div className="text-sm text-[#ffad1d] font-bold">{topic.partitions.value}</div>
                 {expandedExplanation === 'partitions' ? (
-                  <ChevronUp className="h-4 w-4 ml-1" />
+                  <ChevronUp className="h-4 w-4 ml-1 text-[#ffad1d]" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 ml-1" />
+                  <ChevronDown className="h-4 w-4 ml-1 text-[#ffad1d]" />
                 )}
               </div>
               
@@ -92,7 +95,7 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
                 onOpenChange={() => toggleExplanation('partitions')}
                 className="mt-1"
               >
-                <CollapsibleContent className="text-xs p-2 bg-muted/30 rounded-md animate-accordion-down">
+                <CollapsibleContent className="text-xs p-2 bg-[#8c0862]/20 rounded-md animate-accordion-down text-white/80">
                   {topic.partitions.explanation}
                 </CollapsibleContent>
               </Collapsible>
@@ -100,15 +103,15 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
 
             <div className="flex flex-col">
               <div 
-                className="flex items-center space-x-2 rounded-md border p-2 cursor-pointer"
+                className="flex items-center space-x-2 rounded-md border border-[#8c0862]/50 p-2 cursor-pointer bg-black/30 hover:bg-black/50 transition-colors"
                 onClick={() => toggleExplanation('replicationFactor')}
               >
                 <div className="text-sm font-medium leading-none">Replication Factor:</div>
-                <div className="text-sm text-kafka font-bold">{topic.replicationFactor.value}</div>
+                <div className="text-sm text-[#ffad1d] font-bold">{topic.replicationFactor.value}</div>
                 {expandedExplanation === 'replicationFactor' ? (
-                  <ChevronUp className="h-4 w-4 ml-1" />
+                  <ChevronUp className="h-4 w-4 ml-1 text-[#ffad1d]" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 ml-1" />
+                  <ChevronDown className="h-4 w-4 ml-1 text-[#ffad1d]" />
                 )}
               </div>
               
@@ -117,7 +120,7 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
                 onOpenChange={() => toggleExplanation('replicationFactor')}
                 className="mt-1"
               >
-                <CollapsibleContent className="text-xs p-2 bg-muted/30 rounded-md animate-accordion-down">
+                <CollapsibleContent className="text-xs p-2 bg-[#8c0862]/20 rounded-md animate-accordion-down text-white/80">
                   {topic.replicationFactor.explanation}
                 </CollapsibleContent>
               </Collapsible>
@@ -130,7 +133,11 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
             className="w-full space-y-2"
           >
             <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1 border-[#8c0862]/50 hover:border-[#ffad1d] text-white"
+              >
                 <span>Configuration</span>
                 {isConfigOpen ? (
                   <ChevronUp className="h-4 w-4" />
@@ -140,14 +147,14 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 animate-accordion-down">
-              <div className="rounded-md border bg-muted/50">
+              <div className="rounded-md border border-[#8c0862]/50 bg-black/40">
                 <div className="p-4">
-                  <h4 className="text-sm font-medium leading-none mb-2">Topic Configurations</h4>
-                  <div className="space-y-1">
+                  <h4 className="text-sm font-medium leading-none mb-2 text-[#ffad1d]">Topic Configurations</h4>
+                  <div className="space-y-2">
                     {Object.entries(topic.configs).map(([key, value]) => (
-                      <div key={key} className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="font-mono text-muted-foreground">{key}</div>
-                        <div className="font-mono">{value}</div>
+                      <div key={key} className="grid grid-cols-2 gap-2 text-sm border-b border-[#8c0862]/20 pb-2">
+                        <div className="font-mono text-white/70">{key}</div>
+                        <div className="font-mono text-white">{value}</div>
                       </div>
                     ))}
                   </div>
@@ -159,10 +166,10 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply }) => {
       </CardContent>
       
       {onApply && (
-        <CardFooter className="border-t p-4 bg-muted/20 flex justify-end">
+        <CardFooter className="border-t border-[#8c0862]/20 p-4 bg-black/20 flex justify-end">
           <Button 
             onClick={onApply}
-            className="bg-kafka hover:bg-kafka-dark text-white font-medium"
+            className="bg-[#ffad1d] hover:bg-[#ffad1d]/80 text-black font-medium"
           >
             APPLY
           </Button>

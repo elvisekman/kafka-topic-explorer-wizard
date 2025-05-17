@@ -1,113 +1,85 @@
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 
-interface NetworkBackgroundProps {
-  nodeCount?: number;
-  connectionCount?: number;
-}
-
-const NetworkBackground: React.FC<NetworkBackgroundProps> = ({ 
-  nodeCount = 15, 
-  connectionCount = 20 
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    
-    // Create nodes
-    const nodes: {x: number; y: number; size: number; speed: number; direction: number}[] = [];
-    for (let i = 0; i < nodeCount; i++) {
-      nodes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 4 + 2,
-        speed: Math.random() * 0.3 + 0.1,
-        direction: Math.random() * Math.PI * 2
-      });
-    }
-    
-    // Create connections
-    const connections: {from: number; to: number; dashOffset: number; dashSpeed: number}[] = [];
-    for (let i = 0; i < connectionCount; i++) {
-      connections.push({
-        from: Math.floor(Math.random() * nodes.length),
-        to: Math.floor(Math.random() * nodes.length),
-        dashOffset: Math.random() * 1000,
-        dashSpeed: Math.random() * 0.5 + 0.1
-      });
-    }
-    
-    // Animation loop
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw connections
-      ctx.strokeStyle = 'currentColor';
-      ctx.lineWidth = 0.5;
-      
-      connections.forEach(conn => {
-        const fromNode = nodes[conn.from];
-        const toNode = nodes[conn.to];
-        
-        ctx.beginPath();
-        ctx.setLineDash([4, 2]);
-        conn.dashOffset += conn.dashSpeed;
-        ctx.lineDashOffset = conn.dashOffset;
-        ctx.moveTo(fromNode.x, fromNode.y);
-        ctx.lineTo(toNode.x, toNode.y);
-        ctx.stroke();
-      });
-      
-      // Draw and update nodes
-      ctx.setLineDash([]);
-      nodes.forEach(node => {
-        // Update position
-        node.x += Math.cos(node.direction) * node.speed;
-        node.y += Math.sin(node.direction) * node.speed;
-        
-        // Bounce off walls
-        if (node.x < 0 || node.x > canvas.width) {
-          node.direction = Math.PI - node.direction;
-        }
-        if (node.y < 0 || node.y > canvas.height) {
-          node.direction = -node.direction;
-        }
-        
-        // Draw node
-        ctx.beginPath();
-        ctx.fillStyle = 'currentColor';
-        ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      requestAnimationFrame(animate);
-    };
-    
-    animate();
-    
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-    };
-  }, [nodeCount, connectionCount]);
-  
+const NetworkBackground: React.FC = () => {
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="fixed inset-0 z-[-1] opacity-20 dark:opacity-10 pointer-events-none"
-    />
+    <div className="network-bg">
+      <svg 
+        width="100%"
+        height="100%"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <pattern 
+            id="grid" 
+            width="40" 
+            height="40" 
+            patternUnits="userSpaceOnUse"
+          >
+            <path 
+              d="M 40 0 L 0 0 0 40" 
+              fill="none" 
+              stroke="#8c0862" 
+              strokeWidth="0.5"
+              opacity="0.3"
+            />
+          </pattern>
+          
+          <radialGradient id="nodeGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+            <stop offset="0%" stopColor="#ffad1d" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#8c0862" stopOpacity="0.1" />
+          </radialGradient>
+        </defs>
+        
+        {/* Main background */}
+        <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)" />
+        
+        {/* Connection lines */}
+        <g className="connection-lines">
+          <path 
+            d="M 100,200 C 200,100 300,300 400,200" 
+            stroke="#ffad1d" 
+            strokeWidth="1" 
+            fill="none" 
+            opacity="0.2"
+            strokeDasharray="5,5"
+            className="animate-flow"
+          />
+          <path 
+            d="M 500,300 C 400,200 300,400 200,300" 
+            stroke="#8c0862" 
+            strokeWidth="1" 
+            fill="none" 
+            opacity="0.2"
+            strokeDasharray="5,5"
+            className="animate-flow"
+          />
+          <path 
+            d="M 150,400 C 250,300 350,500 450,400" 
+            stroke="#ffad1d" 
+            strokeWidth="1" 
+            fill="none" 
+            opacity="0.2"
+            strokeDasharray="5,5"
+            className="animate-flow"
+          />
+        </g>
+        
+        {/* Nodes */}
+        <g className="nodes">
+          <circle cx="100" cy="200" r="8" fill="url(#nodeGradient)" className="animate-pulse-slow" />
+          <circle cx="400" cy="200" r="8" fill="url(#nodeGradient)" className="animate-pulse-slow" />
+          <circle cx="200" cy="300" r="8" fill="url(#nodeGradient)" className="animate-pulse-slow" />
+          <circle cx="500" cy="300" r="8" fill="url(#nodeGradient)" className="animate-pulse-slow" />
+          <circle cx="150" cy="400" r="8" fill="url(#nodeGradient)" className="animate-pulse-slow" />
+          <circle cx="450" cy="400" r="8" fill="url(#nodeGradient)" className="animate-pulse-slow" />
+        </g>
+        
+        {/* Large circles representing microservice zones */}
+        <circle cx="250" cy="250" r="150" fill="none" stroke="#ffad1d" strokeWidth="1" opacity="0.05" />
+        <circle cx="400" cy="350" r="120" fill="none" stroke="#8c0862" strokeWidth="1" opacity="0.05" />
+      </svg>
+    </div>
   );
 };
 

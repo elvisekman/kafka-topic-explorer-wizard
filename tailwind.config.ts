@@ -54,9 +54,9 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				kafka: {
-					DEFAULT: '#0082C9',
-					dark: '#005F94',
-					light: '#E6F3FA',
+					DEFAULT: '#ffad1d',
+					dark: '#d68c00',
+					light: '#fff3d6',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -110,13 +110,27 @@ export default {
 						opacity: '0',
 						transform: 'translateY(10px)'
 					}
+				},
+				'wiggle': {
+					'0%, 100%': { transform: 'rotate(0deg)' },
+					'25%': { transform: 'rotate(5deg)' },
+					'75%': { transform: 'rotate(-5deg)' },
+				},
+				'explain': {
+					'0%': { transform: 'scale(1) rotate(0deg)' },
+					'25%': { transform: 'scale(1.1) rotate(5deg)' },
+					'50%': { transform: 'scale(1.1) rotate(-5deg)' },
+					'75%': { transform: 'scale(1.1) rotate(5deg)' },
+					'100%': { transform: 'scale(1) rotate(0deg)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
-				'fade-out': 'fade-out 0.3s ease-out'
+				'fade-out': 'fade-out 0.3s ease-out',
+				'wiggle': 'wiggle 0.5s ease-in-out infinite',
+				'explain': 'explain 1s ease-in-out'
 			}
 		}
 	},
