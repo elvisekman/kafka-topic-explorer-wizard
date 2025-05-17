@@ -3,6 +3,14 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 interface RequestFormProps {
   onSubmit: (request: string) => void;
@@ -11,6 +19,7 @@ interface RequestFormProps {
 
 const RequestForm: React.FC<RequestFormProps> = ({ onSubmit, isLoading }) => {
   const [request, setRequest] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,6 +32,11 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSubmit, isLoading }) => {
       });
       return;
     }
+    setIsDialogOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setIsDialogOpen(false);
     onSubmit(request);
   };
 
@@ -66,6 +80,27 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSubmit, isLoading }) => {
           ) : 'Generate Kafka Structure'}
         </Button>
       </form>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Confirmation</DialogTitle>
+            <DialogDescription className="text-center">
+              Are you sure you want to torture AI_BOT_NAME?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button
+              type="button"
+              onClick={handleConfirm}
+              className="bg-kafka hover:bg-kafka-dark text-white font-medium"
+            >
+              YES!
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
