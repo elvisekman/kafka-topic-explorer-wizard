@@ -42,7 +42,6 @@ const KaiMascot: React.FC<KaiMascotProps> = ({ animation, isLoading = false }) =
           </div>
         </div>
       </div>
-      <p className="mt-4 text-lg font-bold text-[#ffad1d]">KAI</p>
       {isLoading && (
         <p className="mt-2 text-sm text-white/70">Processing your request...</p>
       )}

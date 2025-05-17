@@ -165,7 +165,7 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply, onExplanationClic
         </div>
       </CardContent>
       
-      {onApply && (
+      {/*onApply && (
         <CardFooter className="border-t border-[#8c0862]/20 p-4 bg-black/20 flex justify-end">
           <Button 
             onClick={onApply}
@@ -174,7 +174,7 @@ const TopicCard: React.FC<TopicCardProps> = ({ topic, onApply, onExplanationClic
             APPLY
           </Button>
         </CardFooter>
-      )}
+      )*/}
     </Card>
   );
 };

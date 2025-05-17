@@ -71,9 +71,8 @@ const PromptSection: React.FC<PromptSectionProps> = ({ onSubmit, isLoading }) =>
   return (
     <div className="w-full max-w-xl mx-auto animate-fade-in">
       <div className="mb-8 text-center">
-        <h2 className="text-3xl font-bold mb-3 text-[#ffad1d]">Kafka Topic Assistant</h2>
+        <h2 className="text-2xl font-bold mb-3 text-[#ffad1d]"></h2>
         <p className="text-muted-foreground">
-          Tell me what you need, and I'll suggest an optimal Kafka topic structure.
         </p>
       </div>
 
