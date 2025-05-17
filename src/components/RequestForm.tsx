@@ -87,7 +87,7 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSubmit, isLoading }) => {
           <DialogHeader>
             <DialogTitle className="text-center">Confirmation</DialogTitle>
             <DialogDescription className="text-center">
-              Are you sure you want to torture AI_BOT_NAME?
+              Are you sure you want to torture Kafka Wizard?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center">
