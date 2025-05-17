@@ -1,5 +1,6 @@
 
 import React from 'react';
+import ConnectionStatus from './ConnectionStatus';
 
 interface KafkaHeaderProps {
   children?: React.ReactNode;
@@ -23,6 +24,9 @@ const KafkaHeader: React.FC<KafkaHeaderProps> = ({ children }) => {
               />
             </svg>
             <h1 className="text-xl font-bold text-white">Kafka Topic Explorer</h1>
+            <div className="ml-4">
+              <ConnectionStatus />
+            </div>
           </div>
           
           {children}
